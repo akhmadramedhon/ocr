@@ -20,28 +20,40 @@ def allowed_file(filename):
 
 @app.route("/extract-ktp", methods=["POST"])
 def extract_ktp():
-    if 'image' not in request.files:
-        return jsonify({"message": "No file uploaded"}), 400
-    file = request.files['image']
-    if file.filename == '':
-        return redirect(request.url)
-    if allowed_file(file.filename):
-        # Save file to local storage/folder
-        filename = secure_filename(file.filename)
-        save_path = os.path.join(UPLOAD_FOLDER, filename)
-        file.save(save_path)
-        try:
-            process_img = cv2.imread(save_path,0)
+    try:
+        if 'image' not in request.files:
+            print("❌ No image in request")
+            return jsonify({"message": "No file uploaded"}), 400
+        
+        file = request.files['image']
+        if file.filename == '':
+            print("❌ Empty filename")
+            return jsonify({"message": "No file name"}), 400
+        
+        if allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            save_path = os.path.join(UPLOAD_FOLDER, filename)
+            print(f"💾 Saving to: {save_path}")
+            file.save(save_path)
+
+            print(f"📷 Reading image...")
+            process_img = cv2.imread(save_path, 0)
+            if process_img is None:
+                raise Exception("cv2.imread returned None. Check image format.")
+
+            print("🔍 Running OCR extract_data")
             data = ed(process_img)
-            return  jsonify(
-                {
-                    "message" : "Data extract successfully",
-                    "data": data
-                })
-        except Exception as e:
-            return jsonify({"message":f"Error processing image: {str(e)}"}), 500
-    else:
-        return jsonify({"message": "Invalid file type"})
+
+            return jsonify({
+                "message": "Data extract successfully",
+                "data": data
+            })
+        else:
+            return jsonify({"message": "Invalid file type"})
+    except Exception as e:
+        print(f"❌ Exception: {str(e)}")
+        return jsonify({"message": f"Error processing image: {str(e)}"}), 500
+
 
 @app.route("/validate-nik", methods=["POST"])
 def validate_nik():
