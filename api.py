@@ -10,7 +10,7 @@ app  = Flask(__name__)
 CORS(app)
 
 ALLOWED_EXTENSIONS = 'pdf', 'png', 'jpg', 'jpeg'
-UPLOAD_FOLDER = 'images'
+UPLOAD_FOLDER = '/tmp/images'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
