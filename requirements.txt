@@ -1,0 +1,8 @@
+Flask
+flask-cors
+Werkzeug
+opencv-python
+easyocr
+torch
+numpy
+Pillow
